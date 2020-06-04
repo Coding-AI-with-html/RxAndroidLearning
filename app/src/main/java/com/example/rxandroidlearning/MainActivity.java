@@ -31,22 +31,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         text = findViewById(R.id.text);
 
- //final Task task = new Task("Wash dishes", false, 3);
+ final Task task = new Task("Wash dishes", false, 3);
  final List<Task> tasks =  DataSource.createTaskList();
  Observable<Task> taskObservable = Observable
-         .create(new ObservableOnSubscribe<Task>() {
-             @Override
-             public void subscribe(ObservableEmitter<Task> emitter) throws Exception {
-                 for(Task task: DataSource.createTaskList()){
-                     if(!emitter.isDisposed()){
-                         emitter.onNext(task);
-                     }
-                 }
-                 if(!emitter.isDisposed()){
-                     emitter.onComplete();
-                 }
-             }
-         })
+         .just(task) //just() can only take from 1 to 10objects;
          .subscribeOn(Schedulers.io())
          .observeOn(AndroidSchedulers.mainThread());
 
