@@ -33,19 +33,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         text = findViewById(R.id.text);
 
-        Observable<Long> observable = Observable
-                .interval(1, TimeUnit.SECONDS)
+        Observable<Long>  timeObservable= Observable
+                .timer(1, TimeUnit.SECONDS) //after 1second its gonna admit one observable
                 .subscribeOn(Schedulers.io())
-                .takeWhile(new Predicate<Long>() { //takeWhile is for interval to not go forever, for this, its gonna go until hits 6 and ends;
-                    @Override
-                    public boolean test(Long aLong) throws Exception {
-                        Log.d(TAG, "test: "+ aLong + ", Thread:" + Thread.currentThread().getName());
-                        return aLong <= 5;
-                    }
-                })
-                .observeOn(AndroidSchedulers.mainThread());
+                .subscribeOn(AndroidSchedulers.mainThread());
 
-        observable.subscribe(new Observer<Long>() {
+
+        timeObservable.subscribe(new Observer<Long>() {
             @Override
             public void onSubscribe(Disposable d) {
 
