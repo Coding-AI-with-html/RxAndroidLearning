@@ -7,6 +7,8 @@ import android.util.Log;
 import android.widget.TextView;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
 import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -27,60 +29,43 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         text = findViewById(R.id.text);
 
-        Observable<Task> taskObservable = Observable
-                .fromIterable(DataSource.createTaskList())
-                .subscribeOn(Schedulers.io())
-                .filter(new Predicate<Task>() {
-                    @Override
-                    public boolean test(Task task) throws Exception {
-                        Log.d(TAG, "test: " + Thread.currentThread().getName());
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e){
-                            e.printStackTrace();
-                        }
-                        return task.isComplected();
-                    }
-                })
-                .observeOn(AndroidSchedulers.mainThread());
+ final Task task = new Task("Wash dishes", false, 3);
 
-        taskObservable.subscribe(new Observer<Task>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-                Log.d(TAG, "onSubscribe: called");
-                disposable.add(d);
-            }
+ Observable<Task> taskObservable = Observable
+         .create(new ObservableOnSubscribe<Task>() {
+             @Override
+             public void subscribe(ObservableEmitter<Task> emitter) throws Exception {
 
-            @Override
-            public void onNext(Task task) {
-                Log.d(TAG, "onNext: " + Thread.currentThread().getName());
-                Log.d(TAG, "onNext: " + task.getDescription());
-            }
+                 if(!emitter.isDisposed()){
+                     emitter.onNext(task);
+                     emitter.onComplete();
+                 }
+             }
+         })
+         .subscribeOn(Schedulers.io())
+         .observeOn(AndroidSchedulers.mainThread());
 
-            @Override
-            public void onError(Throwable e) {
-                Log.e(TAG, "onError: ", e);
+ taskObservable.subscribe(new Observer<Task>() {
+     @Override
+     public void onSubscribe(Disposable d) {
 
-            }
+     }
 
-            @Override
-            public void onComplete() {
-                Log.d(TAG, "onComplete: called");
+     @Override
+     public void onNext(Task task) {
+         Log.d(TAG, "onNext: "+ task.getDescription());
+     }
 
-            }
-        });
-        //also another way to Observable, also dont forget to add to disposable, because its subscribe  is public final Disposable, need to add disposable.add();
-        disposable.add(taskObservable.subscribe(new Consumer<Task>() {
-            @Override
-            public void accept(Task task) throws Exception {
+     @Override
+     public void onError(Throwable e) {
 
-            }
-        }));
-    }
- //need to create disposable, and clear its just clear subscribers on observable, but dispose clear everything, suggest to use clear, also in MVVM or MVC need in those class'es create clear disposable.
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        disposable.clear();
+     }
+
+     @Override
+     public void onComplete() {
+
+     }
+ });
+
     }
 }
