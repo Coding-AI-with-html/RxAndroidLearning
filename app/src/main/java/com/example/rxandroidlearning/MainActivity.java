@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
+import java.util.List;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -29,15 +31,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         text = findViewById(R.id.text);
 
- final Task task = new Task("Wash dishes", false, 3);
-
+ //final Task task = new Task("Wash dishes", false, 3);
+ final List<Task> tasks =  DataSource.createTaskList();
  Observable<Task> taskObservable = Observable
          .create(new ObservableOnSubscribe<Task>() {
              @Override
              public void subscribe(ObservableEmitter<Task> emitter) throws Exception {
-
+                 for(Task task: DataSource.createTaskList()){
+                     if(!emitter.isDisposed()){
+                         emitter.onNext(task);
+                     }
+                 }
                  if(!emitter.isDisposed()){
-                     emitter.onNext(task);
                      emitter.onComplete();
                  }
              }
