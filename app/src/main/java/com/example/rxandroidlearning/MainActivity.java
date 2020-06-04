@@ -7,6 +7,7 @@ import android.util.Log;
 import android.widget.TextView;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
@@ -32,36 +33,39 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         text = findViewById(R.id.text);
 
- Observable<Integer> taskObservable = Observable
-         .range(0,4)
-         .subscribeOn(Schedulers.io())
-         .repeat(4) //its gonna repeat 4 times from 0 to 3;
-         .observeOn(AndroidSchedulers.mainThread());
+        Observable<Long> observable = Observable
+                .interval(1, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
+                .takeWhile(new Predicate<Long>() { //takeWhile is for interval to not go forever, for this, its gonna go until hits 6 and ends;
+                    @Override
+                    public boolean test(Long aLong) throws Exception {
+                        Log.d(TAG, "test: "+ aLong + ", Thread:" + Thread.currentThread().getName());
+                        return aLong <= 5;
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread());
 
- taskObservable.subscribe(new Observer<Integer>() {
-     @Override
-     public void onSubscribe(Disposable d) {
+        observable.subscribe(new Observer<Long>() {
+            @Override
+            public void onSubscribe(Disposable d) {
 
-     }
+            }
 
-     @Override
-     public void onNext(Integer integer) {
-         Log.d(TAG, "onNext: "+ integer);
-     }
+            @Override
+            public void onNext(Long aLong) {
+                Log.d(TAG, "onNext: " + aLong);
+            }
 
-     @Override
-     public void onError(Throwable e) {
+            @Override
+            public void onError(Throwable e) {
 
-     }
+            }
 
-     @Override
-     public void onComplete() {
+            @Override
+            public void onComplete() {
 
-     }
- });
-
-
-
+            }
+        });
 
     }
 }
