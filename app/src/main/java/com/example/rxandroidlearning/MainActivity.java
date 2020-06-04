@@ -31,22 +31,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         text = findViewById(R.id.text);
 
- final Task task = new Task("Wash dishes", false, 3);
- final List<Task> tasks =  DataSource.createTaskList();
- Observable<Task> taskObservable = Observable
-         .just(task) //just() can only take from 1 to 10objects;
+ Observable<Integer> taskObservable = Observable
+         .range(0,9)
          .subscribeOn(Schedulers.io())
          .observeOn(AndroidSchedulers.mainThread());
 
- taskObservable.subscribe(new Observer<Task>() {
+ taskObservable.subscribe(new Observer<Integer>() {
      @Override
      public void onSubscribe(Disposable d) {
-
      }
 
      @Override
-     public void onNext(Task task) {
-         Log.d(TAG, "onNext: "+ task.getDescription());
+     public void onNext(Integer integer) {
+         Log.d(TAG, "onNext: "+ integer); //its gonna print from 0 to 9;
      }
 
      @Override
@@ -59,6 +56,11 @@ public class MainActivity extends AppCompatActivity {
 
      }
  });
+
+
+
+
+
 
     }
 }
