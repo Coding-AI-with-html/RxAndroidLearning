@@ -17,6 +17,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 
@@ -31,19 +32,33 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         text = findViewById(R.id.text);
 
- Observable<Integer> taskObservable = Observable
+ Observable<Task> taskObservable = Observable
          .range(0,9)
          .subscribeOn(Schedulers.io())
+         .map(new Function<Integer, Task>() {
+             @Override
+             public Task apply(Integer integer) throws Exception {
+                 Log.d(TAG, "apply: " + Thread.currentThread().getName());
+                 return new Task("this is task with priority" + String.valueOf(integer), false, integer);
+             }
+         })
+         .takeWhile(new Predicate<Task>() {
+             @Override
+             public boolean test(Task task) throws Exception {
+                 return task.getPriority() < 9;
+             }
+         })
          .observeOn(AndroidSchedulers.mainThread());
 
- taskObservable.subscribe(new Observer<Integer>() {
+ taskObservable.subscribe(new Observer<Task>() {
      @Override
      public void onSubscribe(Disposable d) {
+
      }
 
      @Override
-     public void onNext(Integer integer) {
-         Log.d(TAG, "onNext: "+ integer); //its gonna print from 0 to 9;
+     public void onNext(Task task) {
+         Log.d(TAG, "onNext: "+ task.getPriority());
      }
 
      @Override
@@ -56,8 +71,6 @@ public class MainActivity extends AppCompatActivity {
 
      }
  });
-
-
 
 
 
