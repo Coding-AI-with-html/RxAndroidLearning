@@ -32,33 +32,21 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         text = findViewById(R.id.text);
 
- Observable<Task> taskObservable = Observable
-         .range(0,9)
+ Observable<Integer> taskObservable = Observable
+         .range(0,4)
          .subscribeOn(Schedulers.io())
-         .map(new Function<Integer, Task>() {
-             @Override
-             public Task apply(Integer integer) throws Exception {
-                 Log.d(TAG, "apply: " + Thread.currentThread().getName());
-                 return new Task("this is task with priority" + String.valueOf(integer), false, integer);
-             }
-         })
-         .takeWhile(new Predicate<Task>() {
-             @Override
-             public boolean test(Task task) throws Exception {
-                 return task.getPriority() < 9;
-             }
-         })
+         .repeat(4) //its gonna repeat 4 times from 0 to 3;
          .observeOn(AndroidSchedulers.mainThread());
 
- taskObservable.subscribe(new Observer<Task>() {
+ taskObservable.subscribe(new Observer<Integer>() {
      @Override
      public void onSubscribe(Disposable d) {
 
      }
 
      @Override
-     public void onNext(Task task) {
-         Log.d(TAG, "onNext: "+ task.getPriority());
+     public void onNext(Integer integer) {
+         Log.d(TAG, "onNext: "+ integer);
      }
 
      @Override
