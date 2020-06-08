@@ -1,11 +1,13 @@
 package com.example.rxandroidlearning;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
 
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -21,6 +23,7 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.ResponseBody;
 
 public class MainActivity extends AppCompatActivity {
     private TextView text;
@@ -31,35 +34,45 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        text = findViewById(R.id.text);
 
-        Observable<Long>  timeObservable= Observable
-                .timer(1, TimeUnit.SECONDS) //after 1second its gonna admit one observable
+          Observable
+                .fromIterable(DataSource.createTaskList())
+                  .map(new Function<Task, String>() {
+                      @Override
+                      public String apply(Task task) throws Exception {
+                          return task.getDescription();
+                      }
+                  })
                 .subscribeOn(Schedulers.io())
-                .subscribeOn(AndroidSchedulers.mainThread());
+                .observeOn(AndroidSchedulers.mainThread())
+                  .subscribe(new Observer<String>() {
+                      @Override
+                      public void onSubscribe(Disposable d) {
 
+                      }
 
-        timeObservable.subscribe(new Observer<Long>() {
-            @Override
-            public void onSubscribe(Disposable d) {
+                      @Override
+                      public void onNext(String task) {
+                          Log.d(TAG, "onNext: "+ task);
+                      }
 
-            }
+                      @Override
+                      public void onError(Throwable e) {
 
-            @Override
-            public void onNext(Long aLong) {
-                Log.d(TAG, "onNext: " + aLong);
-            }
+                      }
 
-            @Override
-            public void onError(Throwable e) {
+                      @Override
+                      public void onComplete() {
 
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        });
+                      }
+                  });
 
     }
+    Function<Task, String> extractDesFunc = new Function<Task, String>() {
+        @Override
+        public String apply(Task task) throws Exception {
+            Log.d(TAG, "apply: doing work on thread " + Thread.currentThread().getName());
+            return task.getDescription(); 
+        }
+    };
 }
